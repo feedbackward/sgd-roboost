@@ -114,6 +114,6 @@ Results are written to disk with the following nomenclature: `[task]-[model]_[al
 
 This repository includes detailed demonstrations to walk the user through re-creating the results in the papers cited at the top of this document. Below is a list of demo links which give our demos (originally in Jupyter notebook form) rendered using the useful <a href="https://github.com/jupyter/nbviewer">nbviewer</a> service.
 
-- <a href="https://nbviewer.jupyter.org/github/feedbackward/sgd-roboost/blob/main/roboost/demo_torch.ipynb">Demo: tests using benchmark data</a>
+- <a href="https://nbviewer.jupyter.org/github/feedbackward/sgd-roboost/blob/main/sgd-roboost/demo_torch.ipynb">Demo: tests using benchmark data</a>
 
 
