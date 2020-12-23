@@ -76,7 +76,7 @@ $ (sgd-roboost) pip install -e ./
 $ (sgd-roboost) cd ../sgd-roboost
 ```
 
-__Safe hash value:__ `4864c695cb7fa286c93355db65b6ad7ba59860ff` (tested 2020/12/23).
+__Safe hash value:__ `2e88b08768f5db85ff2673fceca98078a07647a8` (tested 2020/12/23).
 
 Next, we proceed under the assumption that the user has already completed the data acquisition as described in the previous section, i.e., the user has some `DATADIR` directory with all the processed `*.h5` files of interest.
 
