@@ -15,10 +15,7 @@ from torch.utils.data import TensorDataset
 ## Clerical preparation.
 
 # This directory will need to be set manually.
-#dir_data_toread = os.path.join(str(Path.home()), "DATADIR")
-dir_data_toread = os.path.join(str(Path.home()),
-                               "tmp", "test_torch_demo",
-                               "data_master")
+dir_data_toread = os.path.join(str(Path.home()), "DATADIR")
 
 # Specific dataset parameters that are set manually.
 _n_train_frac = 0.8
