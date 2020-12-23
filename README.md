@@ -71,16 +71,18 @@ $ conda create -n sgd-roboost python=3.8 jupyter matplotlib pip pytables scipy
 $ conda activate sgd-roboost
 $ (sgd-roboost) conda install pytorch cudatoolkit=10.2 -c pytorch
 $ (sgd-roboost) cd mml
-$ (sgd-roboost) git checkout [SHA, e.g. 41cac04b7df7277c197f218a0fa347e726c66326]
+$ (sgd-roboost) git checkout [SHA-1]
 $ (sgd-roboost) pip install -e ./
 $ (sgd-roboost) cd ../sgd-roboost
 ```
+
+__Safe hash value:__ `4864c695cb7fa286c93355db65b6ad7ba59860ff` (tested 2020/12/23).
 
 Next, we proceed under the assumption that the user has already completed the data acquisition as described in the previous section, i.e., the user has some `DATADIR` directory with all the processed `*.h5` files of interest.
 
 With this preparation in place, we can move to running the experiments. First, various parameters related to the experiments are set as follows.
 
-- __Data parameters:__ (in `setup_torch_data`)
+- __Data parameters:__ (in `setup_torch_data.py`)
   - Manually set the `dir_data_toread` variable to the `DATADIR` discussed in the previous section  (the default is literally called `DATADIR`, and is placed set in the home directory).
   - Dataset-specific training/validation set sizes are set using the parameters `n_train_frac` and `n_val_frac`. These are values between 0 and 1 that specify the fraction of the entire dataset to be used. The leftover data are used for testing.
 
