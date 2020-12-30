@@ -9,8 +9,8 @@ This project contains code which can be used to faithfully reproduce all the exp
 
 At a high level, this repository is divided into two main parts:
 
-- __Tests using real-world data:__ since we implement most of the back end using PyTorch, code related to the tests using benchmark data sets has a filename of the form `*_torch*`.
-- __Tests using controlled simulations:__ all code related to simulation-centric experiments has a filename of the form `*_sims*`.
+- __Tests using real-world data:__ since we implement most of the back end using PyTorch, code specifically related to the tests using benchmark data sets has filenames of the form `learn_torch_*` and `setup_torch_*.py`.
+- __Tests using controlled simulations:__ all other files of the form `learn_*` or `setup_*.py` without the `torch` substring is related to our simulation-based tests.
 
 A table of contents for this README file:
 
@@ -76,6 +76,8 @@ $ (sgd-roboost) pip install -e ./
 $ (sgd-roboost) cd ../sgd-roboost
 ```
 
+For the `[SHA-1]` placeholder, the following is a safe, tested value.
+
 __Safe hash value:__ `ea67b5a4df389b63f59d080ad3ed7a4fe7bea7ee` (tested 2020/12/23).
 
 Next, we proceed under the assumption that the user has already completed the data acquisition as described in the previous section, i.e., the user has some `DATADIR` directory with all the processed `*.h5` files of interest.
@@ -97,7 +99,7 @@ With this preparation in place, we can move to running the experiments. First, v
 With all the parameters set as desired, execution is a one line operation.
 
 ```
-./learn_torch_run.sh [dataset1 dataset2 ...]
+$ (sgd-roboost) ./learn_torch_run.sh [dataset1 dataset2 ...]
 ```
 
 The high level flow is as follows. All shell scripts are run using `bash`. The script `learn_torch_run.sh` saves the common parameters as environment variables, and goes to work executing `learn_torch_run_[dataset1].sh`, `learn_torch_run_[dataset2].sh`, and so on, in order. Within each script `learn_torch_run_*.sh`, the main Python script `learn_torch_driver.py` is called and passed all experiment parameters as arguments (both dataset-specific and dataset-independent parameters). Note that `learn_torch_driver.py` is called within a loop over what we call "tasks," where each task is characterized by one or more dataset-specific parameters and a task name, all of which are passed to the main driver script.
@@ -108,7 +110,36 @@ Results are written to disk with the following nomenclature: `[task]-[model]_[al
 <a id="code_sims"></a>
 ## Setup: software for simulations
 
-*To be added no later than the end of January, 2021.*
+Here we describe how to prepare the software for the simulation-based experiments that run purely on Numpy and SciPy, and do not make use of PyTorch. There is some overlap here with the explanation given above for tests using benchmark data.
+
+As before, we assume that the user's current working directory does not contain `sgd-roboost` or `mml` yet. The clerical setup is as follows:
+
+```
+$ git clone https://github.com/feedbackward/sgd-roboost.git
+$ git clone https://github.com/feedbackward/mml.git
+$ conda create -n sgd-roboost python=3.8 jupyter matplotlib pip pytables scipy
+$ conda activate sgd-roboost
+$ (sgd-roboost) cd mml
+$ (sgd-roboost) git checkout [SHA-1]
+$ (sgd-roboost) pip install -e ./
+$ (sgd-roboost) cd ../sgd-roboost
+```
+
+Here is a safe value for the hash value placeholder `[SHA-1]`.
+
+__Safe hash value:__ `d641489c6fd790ec9abada7691b4baf61676c47f` (tested 2020/12/30).
+
+In running the experiments, key experimental parameters (and clerical settings) are specified in the following files.
+
+- __Data parameters:__ (in `setup_data.py`) everything from sample size and underlying model dimension to noise distributions is specified within this file.
+
+- __Experiment parameters:__ (in `learn_run.sh`) the choice of algorithm, model, data generation protocol, among other key parameters is made within this simple shell script.
+  
+- __Storage of results:__ results are stored by default `[results_dir]/sims`, where `results_dir` is specified in `setup_results.py`.
+
+- __Robust boosting settings:__ all specified within `setup_roboost.py`. The sub-routines to be tested are specified by the variable `todo_roboost`.
+
+The overall flow is quite straightforward. Running the script `learn_run.sh` in `bash`, the main Python driver script `learn_driver.py` is passed all the key experimental parameters as arguments.
 
 
 <a id="demos"></a>
@@ -117,5 +148,6 @@ Results are written to disk with the following nomenclature: `[task]-[model]_[al
 This repository includes detailed demonstrations to walk the user through re-creating the results in the papers cited at the top of this document. Below is a list of demo links which give our demos (originally in Jupyter notebook form) rendered using the useful <a href="https://github.com/jupyter/nbviewer">nbviewer</a> service.
 
 - <a href="https://nbviewer.jupyter.org/github/feedbackward/sgd-roboost/blob/main/sgd-roboost/demo_torch.ipynb">Demo: tests using benchmark data</a>
+- <a href="https://nbviewer.jupyter.org/github/feedbackward/sgd-roboost/blob/main/sgd-roboost/demo_sims.ipynb">Demo: tests using simulations</a>
 
 
