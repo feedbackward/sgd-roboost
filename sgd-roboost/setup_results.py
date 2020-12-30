@@ -1,4 +1,4 @@
-'''Basic config for visualization of results for this project.'''
+'''Setup: basic config for visualization of results for this project.'''
 
 ## External modules.
 import matplotlib.pyplot as plt
@@ -31,7 +31,3 @@ def export_legend(legend, filename="legend.pdf", expand=[-5,-5,5,5]):
 
 
 ###############################################################################
-
-
-
-
