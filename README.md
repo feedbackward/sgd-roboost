@@ -20,7 +20,12 @@ A table of contents for this README file:
 - <a href="#code_sims">Setup: software for simulations</a>
 - <a href="#demos">List of demos</a>
 
-Before diving into any of the setup detailed below, we assume assume the user has access to a `bash` shell, can use `wget` to download data sets, has `git` and `conda` installed, and has run the following command:
+Before diving into any of the setup detailed below, we assume the following about the user's environment:
+- has access to a `bash` shell
+- can use `wget` to download data sets
+- has `unzip`, `git`, and `conda` installed
+
+and finally that they have run
 
 ```
 $ conda update -n base conda
@@ -49,13 +54,13 @@ Next, we need to specify where the data will be stored. There are two configurat
 - `dir_data_toread`: this is where the raw data files will be stored.
 - `dir_data_towrite`: this is where the processed data files (all in .h5 format) will be stored.
 
-In particular, we will later be making use of the value assigned to `dir_data_towrite`; let us call this `DATADIR` for ease of reference later. Once these are set, `cd` to `mml/mml/data/`. From here, acquiring and processing the data is a one-line operation:
+In particular, we will later be making use of the value assigned to `dir_data_towrite`; for the purpose of this documentation, we refer to this directory as __Data-Main__ for ease of reference later. Once these are set, `cd` to `mml/mml/data/`. From here, acquiring and processing the data is a one-line operation:
 
 ```
 (mml-data) $ ./do_getdata.sh [adult ...]
 ```
 
-This can be done whenever some dataset is desired. Furthermore, once all the desired datasets have been acquired, we can feel free to delete the `mml` directory we used here. One natural approach is to download raw data into `mml`, but set `DATADIR` to some other separate location to be used by other project-local software.
+This can be done whenever some dataset is desired. Furthermore, once all the desired datasets have been acquired, we can feel free to delete the `mml` directory we used here. One natural approach is to download raw data into `mml`, but set __Data-Main__ to some other separate location to be used by other project-local software.
 
 
 <a id="code_torch"></a>
@@ -81,12 +86,12 @@ For the `[SHA-1]` placeholder, the following is a safe, tested value.
 
 __Safe hash value:__ `ea67b5a4df389b63f59d080ad3ed7a4fe7bea7ee` (tested 2020/12/23).
 
-Next, we proceed under the assumption that the user has already completed the data acquisition as described in the previous section, i.e., the user has some `DATADIR` directory with all the processed `*.h5` files of interest.
+Next, we proceed under the assumption that the user has already completed the data acquisition as described in the previous section, i.e., the user has some __Data-Main__ directory with all the processed `*.h5` files of interest.
 
 With this preparation in place, we can move to running the experiments. First, various parameters related to the experiments are set as follows.
 
 - __Data parameters:__ (in `setup_torch_data.py`)
-  - Manually set the `dir_data_toread` variable to the `DATADIR` discussed in the previous section  (the default is literally called `DATADIR`, and is placed set in the home directory).
+  - Manually set the `dir_data_toread` variable to __Data-Main__ discussed in the previous section.
   - Dataset-specific training/validation set sizes are set using the parameters `n_train_frac` and `n_val_frac`. These are values between 0 and 1 that specify the fraction of the entire dataset to be used. The leftover data are used for testing.
 
 - __Experiment parameters:__ (in `learn_torch_run.sh` and `learn_torch_run_*.sh`)
