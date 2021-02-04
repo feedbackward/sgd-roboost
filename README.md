@@ -40,8 +40,8 @@ Benchmark datasets can be acquired as follows.
 $ git clone https://github.com/feedbackward/mml.git
 $ conda create -n mml-data python=3.8 pip pytables scipy
 $ conda activate mml-data
-$ (mml-data) cd mml
-$ (mml-data) pip install -e ./
+(mml-data) $ cd mml
+(mml-data) $ pip install -e ./
 ```
 
 Next, we need to specify where the data will be stored. There are two configuration variables in `mml/mml/config.py` to be set manually:
@@ -52,7 +52,7 @@ Next, we need to specify where the data will be stored. There are two configurat
 In particular, we will later be making use of the value assigned to `dir_data_towrite`; let us call this `DATADIR` for ease of reference later. Once these are set, `cd` to `mml/mml/data/`. From here, acquiring and processing the data is a one-line operation:
 
 ```
-$ (mml-data) ./do_getdata.sh [adult ...]
+(mml-data) $ ./do_getdata.sh [adult ...]
 ```
 
 This can be done whenever some dataset is desired. Furthermore, once all the desired datasets have been acquired, we can feel free to delete the `mml` directory we used here. One natural approach is to download raw data into `mml`, but set `DATADIR` to some other separate location to be used by other project-local software.
@@ -70,11 +70,11 @@ $ git clone https://github.com/feedbackward/sgd-roboost.git
 $ git clone https://github.com/feedbackward/mml.git
 $ conda create -n sgd-roboost python=3.8 jupyter matplotlib pip pytables scipy
 $ conda activate sgd-roboost
-$ (sgd-roboost) conda install pytorch cudatoolkit=10.2 -c pytorch
-$ (sgd-roboost) cd mml
-$ (sgd-roboost) git checkout [SHA-1]
-$ (sgd-roboost) pip install -e ./
-$ (sgd-roboost) cd ../sgd-roboost
+(sgd-roboost) $ conda install pytorch cudatoolkit=10.2 -c pytorch
+(sgd-roboost) $ cd mml
+(sgd-roboost) $ git checkout [SHA-1]
+(sgd-roboost) $ pip install -e ./
+(sgd-roboost) $ cd ../sgd-roboost
 ```
 
 For the `[SHA-1]` placeholder, the following is a safe, tested value.
@@ -100,7 +100,7 @@ With this preparation in place, we can move to running the experiments. First, v
 With all the parameters set as desired, execution is a one line operation.
 
 ```
-$ (sgd-roboost) ./learn_torch_run.sh [dataset1 dataset2 ...]
+(sgd-roboost) $ ./learn_torch_run.sh [dataset1 dataset2 ...]
 ```
 
 The high level flow is as follows. All shell scripts are run using `bash`. The script `learn_torch_run.sh` saves the common parameters as environment variables, and goes to work executing `learn_torch_run_[dataset1].sh`, `learn_torch_run_[dataset2].sh`, and so on, in order. Within each script `learn_torch_run_*.sh`, the main Python script `learn_torch_driver.py` is called and passed all experiment parameters as arguments (both dataset-specific and dataset-independent parameters). Note that `learn_torch_driver.py` is called within a loop over what we call "tasks," where each task is characterized by one or more dataset-specific parameters and a task name, all of which are passed to the main driver script.
@@ -120,10 +120,10 @@ $ git clone https://github.com/feedbackward/sgd-roboost.git
 $ git clone https://github.com/feedbackward/mml.git
 $ conda create -n sgd-roboost python=3.8 jupyter matplotlib pip pytables scipy
 $ conda activate sgd-roboost
-$ (sgd-roboost) cd mml
-$ (sgd-roboost) git checkout [SHA-1]
-$ (sgd-roboost) pip install -e ./
-$ (sgd-roboost) cd ../sgd-roboost
+(sgd-roboost) $ cd mml
+(sgd-roboost) $ git checkout [SHA-1]
+(sgd-roboost) $ pip install -e ./
+(sgd-roboost) $ cd ../sgd-roboost
 ```
 
 Here is a safe value for the hash value placeholder `[SHA-1]`.
