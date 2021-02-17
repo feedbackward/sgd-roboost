@@ -13,6 +13,6 @@ def get_w_init(rg, **kwargs):
                        high=kwargs["init_range"],
                        size=w_init.shape)
     return w_init + noise
-                                             
-    
+
+
 ###############################################################################

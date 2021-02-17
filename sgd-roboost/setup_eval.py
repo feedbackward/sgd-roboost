@@ -40,7 +40,7 @@ def get_eval(loss_name=None, model_name=None, **kwargs):
 
         if loss_name == "quadratic" and model_name == "linreg":
             risk_eval = lambda model, X, y: risk_quadratic_linreg(
-                w=model.w,
+                w=model.paras["w"],
                 w_star=kwargs["w_star"],
                 A=kwargs["cov_X"],
                 b=np.sqrt(kwargs["noise_var"])

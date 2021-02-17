@@ -73,9 +73,6 @@ if args.data is None:
 ## Name to be used identifying the results etc. of this experiment.
 towrite_name = args.task_name+"-"+"_".join([args.model, args.algo])
 
-## Model class must be initialized here, to ensure all sub-procs get access.
-Model_class = get_model(model_class=args.model)
-
 ## Prepare a directory to save results.
 towrite_dir = os.path.join(results_dir, "sims", args.data)
 makedir_safe(towrite_dir)
@@ -115,7 +112,7 @@ if __name__ == "__main__":
         ## Prepare evaluation metric(s).
         eval_dict = get_eval(loss_name=args.loss,
                              model_name=args.model, **ds_paras)
-
+        
         ## First randomly initialize the parameters for each model.
         cand_array = []
         for i in range(args.num_processes):
@@ -125,12 +122,22 @@ if __name__ == "__main__":
         ## Next initialize the models with views of the parameters.
         models = []
         for i in range(len(cand_array)):
-            model = Model_class(w_init=cand_array[i:(i+1),:].T)
+            model = get_model(
+                model_class=args.model,
+                paras_init={"w":cand_array[i:(i+1),:].T},
+                rg=rg,
+                **ds_paras
+            )
             models.append(model)
         
         ## Prepare the carrier model.
-        model_carrier = Model_class(w_init=get_w_init(rg=rg, **ds_paras))
-        
+        model_carrier = get_model(
+            model_class=args.model,
+            paras_init={"w":get_w_init(rg=rg, **ds_paras)},
+            rg=rg,
+            **ds_paras
+        )
+
         ## Prepare algorithms.
         algos = []
         for j, model in enumerate(models):
@@ -196,7 +203,7 @@ if __name__ == "__main__":
                             trial, epoch, proc_num
                         )
                     )
-                
+            
             ## Evaluate performance of the sub-process candidates.
             eval_models(epoch=epoch,
                         models=models,
@@ -221,10 +228,10 @@ if __name__ == "__main__":
                            storage=storage_rb,
                            data=(X_train,y_train,X_test,y_test),
                            eval_dict=eval_dict)
-
+            
             print("(Tr {}) Ep {} finished.".format(trial, epoch), "\n")
-
-
+        
+        
         ## Write performance for this trial to disk.
         perf_fname = os.path.join(towrite_dir,
                                   towrite_name+"-"+str(trial))

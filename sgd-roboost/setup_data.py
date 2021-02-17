@@ -22,7 +22,7 @@ dataset_paras = {
         "n_train": _n//2,
         "n_val": _n//2,
         "n_test": _n,
-        "d": _d,
+        "num_features": _d,
         "noise_dist": "lognormal",
         "noise_paras": {"mean": 0.0, "sigma": 1.75},
         "cov_X": np.eye(_d),
@@ -32,7 +32,7 @@ dataset_paras = {
         "n_train": _n//2,
         "n_val": _n//2,
         "n_test": _n,
-        "d": _d,
+        "num_features": _d,
         "noise_dist": "normal",
         "noise_paras": {"loc": 0.0, "scale": 2.2},
         "cov_X": np.eye(_d),
@@ -68,7 +68,7 @@ def get_data_simulated(paras, rg=None):
     n_val = paras["n_val"]
     n_test = paras["n_test"]
     n_total = n_train+n_val+n_test
-    d = paras["d"]
+    d = paras["num_features"]
     
     ## Setup of random generator.
     if rg is None:
@@ -77,7 +77,8 @@ def get_data_simulated(paras, rg=None):
     
     ## Specifying the true underlying model.
     w_star = np.ones(d).reshape((d,1))
-    true_model = LinearRegression(w_init=w_star)
+    true_model = LinearRegression(num_features=d,
+                                  paras_init={"w": w_star})
     paras.update({"w_star": w_star})
     
     ## Noise generator and stats.

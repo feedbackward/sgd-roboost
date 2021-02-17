@@ -10,15 +10,15 @@ from mml.models.linreg import LinearRegression
 ###############################################################################
 
 
-## Dictionary for organizing model class objects.
-
-models_dict = {"linreg": LinearRegression}
-
-
 ## The main parser function, returning class objects (not instances).
 
-def get_model(model_class):
-    return models_dict[model_class]
+def get_model(model_class, paras_init=None, rg=None, **kwargs):
+
+    if model_class == "linreg":
+        return LinearRegression(num_features=kwargs["num_features"],
+                                paras_init=paras_init, rg=rg)
+    else:
+        raise ValueError("Please pass a valid model name.")
 
 
 ###############################################################################

@@ -29,7 +29,7 @@ def do_roboost(model_todo, ref_models, cand_array,
 
     ## Before doing anything, check if output is trivial.
     if cand_array.shape[0] == 1:
-        model_todo.w = cand_array[0:1,:].T
+        model_todo.paras["w"] = cand_array[0:1,:].T
         return None
 
     ## Otherwise, proceed.
@@ -79,7 +79,7 @@ def do_roboost(model_todo, ref_models, cand_array,
             )
         )
     
-    model_todo.w = p_new.reshape(model_todo.w.shape)
+    model_todo.paras["w"] = p_new.reshape(model_todo.paras["w"].shape)
     return None
 
 

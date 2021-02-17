@@ -15,7 +15,8 @@ from mml.algos.gd import GD_ERM
 
 def get_algo(name, model, loss, **kwargs):
     if name == "SGD":
-        return GD_ERM(step_coef=kwargs["step_size"]/np.sqrt(kwargs["d"]),
+        step_coef = kwargs["step_size"]/np.sqrt(kwargs["num_features"])
+        return GD_ERM(step_coef=step_coef,
                       model=model,
                       loss=loss)
     else:
