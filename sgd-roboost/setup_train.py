@@ -4,7 +4,7 @@
 ###############################################################################
 
 
-def train_epoch(num, algo, loss, X, y, batch_size, verbose=False):
+def train_epoch(num, algo, loss, X, y, batch_size=None, verbose=False):
     '''
     Basic procedure for a single epoch.
     '''
@@ -16,6 +16,10 @@ def train_epoch(num, algo, loss, X, y, batch_size, verbose=False):
     
     n = len(X)
     idx_start = 0
+    
+    ## Cover the full-batch case.
+    if batch_size is None or batch_size == 0:
+        batch_size = n
     idx_stop = min(batch_size, n)
 
     ## Run the algorithm for one epoch.
