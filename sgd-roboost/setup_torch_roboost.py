@@ -64,30 +64,31 @@ def do_roboost(para, ref_models, cand_tensor, data_val, device,
             else:
                 raise ValueError("Please pass a proper validation subroutine.")
             
-            p_new = cand_array[np.argmin(loss_stats),:]
+            p_new = cand_array[np.argmin(loss_stats),...]
 
         ## Otherwise, do roboost with "Merge" subroutine.
         elif rb_method == "geomed-space":
-            p_new = geomed(A=cand_array).ravel()
+            p_new = geomed(A=cand_array)
         elif rb_method == "geomed-set":
-            p_new = geomed_set(A=cand_array).ravel()
+            p_new = geomed_set(A=cand_array)
         elif rb_method == "smallball":
-            p_new = smallball(A=cand_array).ravel()
+            p_new = smallball(A=cand_array)
         elif rb_method == "centroid":
-            p_new = np.mean(cand_array, axis=0)
+            p_new = np.mean(cand_array, axis=0, keepdims=False)
         elif rb_method == "take-rand":
             idx_rand = rg.choice(a=len(cand_array), size=1).item()
-            p_new = np.copy(cand_array[idx_rand,:])
+            p_new = cand_array[idx_rand,...]
         elif rb_method == "triv-first":
-            p_new = np.copy(cand_array[0,:]) ## trivial, for debugging.
+            p_new = cand_array[0,...] ## trivial, for debugging.
         elif rb_method == "triv-last":
-            p_new = np.copy(cand_array[-1,:]) ## trivial, for debugging.
+            p_new = cand_array[-1,...] ## trivial, for debugging.
         else:
             raise ValueError(
                 "Please pass a valid rb_method. ({})".format(todo_roboost)
             )
-        
-        para.data = torch.from_numpy(p_new).view(para.shape)
+
+        ## Copy and adjust shape before reflecting in Torch paras.
+        para.data = torch.from_numpy(np.copy(p_new)).view(para.shape)
         return None
 
 

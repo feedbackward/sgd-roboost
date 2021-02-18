@@ -116,15 +116,17 @@ if __name__ == "__main__":
         ## First randomly initialize the parameters for each model.
         cand_array = []
         for i in range(args.num_processes):
-            cand_array.append(get_w_init(rg=rg, **ds_paras))
-        cand_array = np.hstack(cand_array).T
+            cand_array.append(
+                np.expand_dims(a=get_w_init(rg=rg, **ds_paras),axis=0)
+            )
+        cand_array = np.vstack(cand_array)
         
         ## Next initialize the models with views of the parameters.
         models = []
         for i in range(len(cand_array)):
             model = get_model(
                 model_class=args.model,
-                paras_init={"w":cand_array[i:(i+1),:].T},
+                paras_init={"w": cand_array[i,...]},
                 rg=rg,
                 **ds_paras
             )
@@ -133,7 +135,7 @@ if __name__ == "__main__":
         ## Prepare the carrier model.
         model_carrier = get_model(
             model_class=args.model,
-            paras_init={"w":get_w_init(rg=rg, **ds_paras)},
+            paras_init={"w": get_w_init(rg=rg, **ds_paras)},
             rg=rg,
             **ds_paras
         )
@@ -194,8 +196,8 @@ if __name__ == "__main__":
                 train_epoch(num=proc_num,
                             algo=algo,
                             loss=loss,
-                            X=X_train[data_idx,:],
-                            y=y_train[data_idx,:],
+                            X=X_train[data_idx,...],
+                            y=y_train[data_idx,...],
                             batch_size=args.batch_size)
                 if args.verbose:
                     print(
