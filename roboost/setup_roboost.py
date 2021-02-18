@@ -12,9 +12,7 @@ from mml.utils.vecmean import geomed, geomed_set, smallball
 
 
 ## List of names of roboost methods to be tried.
-todo_roboost = ["take-rand",
-                "geomed-space", "geomed-set", "smallball", "centroid",
-                "valid-ave", "valid-med", "valid-robust"]
+todo_roboost = ["valid-robust"]
 
 ## Note: all possibilities are listed below.
 #["triv-first", "triv-last", "take-rand",
