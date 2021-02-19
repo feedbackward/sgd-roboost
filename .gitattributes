@@ -3,4 +3,4 @@
 #  https://github.com/github/linguist#using-gitattributes
 #  https://github.com/github/linguist/issues/3282
 
-sgd-roboost/*.ipynb linguist-documentation
+roboost/*.ipynb linguist-documentation
