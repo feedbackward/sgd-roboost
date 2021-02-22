@@ -84,7 +84,7 @@ $ conda activate sgd-roboost
 
 For the `[SHA-1]` placeholder, the following is a safe, tested value.
 
-__Safe hash value:__ `9eca553bcd2c0977df59426c1ddf89b07808aebc` (tested 2021/02/17).
+__Safe hash value:__ `6ee6a8f924b610ccfb9c5239e852ac7df72cf14c` (tested 2021/02/22).
 
 Next, we proceed under the assumption that the user has already completed the data acquisition as described in the previous section, i.e., the user has some __Data-Main__ directory with all the processed `*.h5` files of interest.
 
