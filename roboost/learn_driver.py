@@ -11,7 +11,6 @@ from mml.utils import makedir_safe
 from setup_algos import get_algo
 from setup_data import get_data
 from setup_eval import get_eval, eval_model, eval_models, eval_write
-from setup_inits import get_w_init
 from setup_losses import get_loss
 from setup_models import get_model
 from setup_results import results_dir
@@ -35,6 +34,11 @@ parser.add_argument("--batch-size",
 parser.add_argument("--data",
                     help="Specify data set to be used (default: None).",
                     type=str, default=None, metavar="S")
+parser.add_argument("--entropy",
+                    help="For data-gen seed sequence (default is random).",
+                    type=int,
+                    default=np.random.SeedSequence().entropy,
+                    metavar="N")
 parser.add_argument("--loss",
                     help="Loss name. (default: quadratic)",
                     type=str, default="quadratic", metavar="S")
@@ -77,27 +81,28 @@ towrite_name = args.task_name+"-"+"_".join([args.model, args.algo])
 towrite_dir = os.path.join(results_dir, "sims", args.data)
 makedir_safe(towrite_dir)
 
+## Setup of manually-specified seed sequence for data generation.
+ss_data_parent = np.random.SeedSequence(args.entropy)
+ss_data_children = ss_data_parent.spawn(args.num_trials)
+rgs_data = [np.random.default_rng(seed=s) for s in ss_data_children]
+
 
 ## Main process.
 if __name__ == "__main__":
     
     ## Prepare the loss for training.
     loss = get_loss(name=args.loss)
-
-    ## Arguments for algorithms.
-    algo_kwargs = {"step_size": args.step_size}
-    
-    ## Arguments for models.
-    model_kwargs = {}
     
     ## Start the loop over independent trials.
     for trial in range(args.num_trials):
+
+        ## Get trial-specific random generator.
+        rg_data = rgs_data[trial]
         
         ## Load in data.
         print("Start data prep.")
         (X_train, y_train, X_val, y_val,
-         X_test, y_test, ds_paras) = get_data(dataset=args.data,
-                                              rg=rg)
+         X_test, y_test, ds_paras) = get_data(dataset=args.data, rg=rg_data)
         n_per_subset = len(X_train) // args.num_processes
         
         ## Indices to evenly split the training data (toss the excess).
@@ -112,42 +117,55 @@ if __name__ == "__main__":
         ## Prepare evaluation metric(s).
         eval_dict = get_eval(loss_name=args.loss,
                              model_name=args.model, **ds_paras)
-        
-        ## First randomly initialize the parameters for each model.
-        cand_array = []
-        for i in range(args.num_processes):
-            cand_array.append(
-                np.expand_dims(a=get_w_init(rg=rg, **ds_paras),axis=0)
-            )
-        cand_array = np.vstack(cand_array)
-        
-        ## Next initialize the models with views of the parameters.
-        models = []
-        for i in range(len(cand_array)):
-            model = get_model(
-                model_class=args.model,
-                paras_init={"w": cand_array[i,...]},
-                rg=rg,
-                **ds_paras
-            )
-            models.append(model)
-        
-        ## Prepare the carrier model.
-        model_carrier = get_model(
-            model_class=args.model,
-            paras_init={"w": get_w_init(rg=rg, **ds_paras)},
-            rg=rg,
-            **ds_paras
-        )
 
+        ## Initialize sub-process models.
+        models = []
+        for j in range(args.num_processes):
+
+            ## Arguments for models.
+            model_kwargs = {}
+
+            ## Construct and append models.
+            models.append(
+                get_model(
+                    name=args.model,
+                    paras_init=None,
+                    rg=rg,
+                    **model_kwargs, **ds_paras
+                )
+            )
+
+        ## Prepare the carrier model.
+        model_kwargs = {}
+        model_carrier = get_model(
+            name=args.model,
+            paras_init=None,
+            rg=rg,
+            **model_kwargs, **ds_paras
+        )
+        
         ## Prepare algorithms.
         algos = []
         for j, model in enumerate(models):
-            algo = get_algo(name=args.algo,
-                            model=model,
-                            loss=loss,
-                            **ds_paras, **algo_kwargs)
-            algos.append(algo)
+
+            ## Arguments for algorithms.
+            algo_kwargs = {}
+            model_dim = np.array(
+                [p.size for pn, p in model.paras.items()]
+            ).sum()
+            algo_kwargs.update(
+                {"step_size": args.step_size/np.sqrt(model_dim)}
+            )
+
+            ## Construct and append algorithms.
+            algos.append(
+                get_algo(
+                    name=args.algo,
+                    model=model,
+                    loss=loss,
+                    **ds_paras, **algo_kwargs
+                )
+            )
         
         ## Prepare storage for performance evaluation this trial.
         store_train = {
@@ -212,18 +230,30 @@ if __name__ == "__main__":
                         storage=storage,
                         data=(X_train,y_train,X_test,y_test),
                         eval_dict=eval_dict)
+
+            ## Construct the candidate arrays for roboost convenience.
+            cand_dict = {}
+            for pn, p in model_carrier.paras.items():
+                cand_array = []
+                for model in models:
+                    cand_array.append(
+                        np.expand_dims(
+                            a=np.copy(model.paras[pn]),axis=0
+                        )
+                    )
+                cand_dict[pn] = np.vstack(cand_array)
             
-            ## Do robust boosting and evaluate performance.
+            ## Robust boosting of the underlying sub-processes.
             for j, rb in enumerate(todo_roboost):
 
                 do_roboost(model_todo=model_carrier,
                            ref_models=models,
-                           cand_array=cand_array,
+                           cand_dict=cand_dict,
                            data_val=(X_val,y_val),
                            loss=loss,
                            rb_method=rb,
                            rg=rg)
-
+                
                 eval_model(epoch=epoch,
                            model=model_carrier,
                            model_idx=j,
@@ -232,7 +262,6 @@ if __name__ == "__main__":
                            eval_dict=eval_dict)
             
             print("(Tr {}) Ep {} finished.".format(trial, epoch), "\n")
-        
         
         ## Write performance for this trial to disk.
         perf_fname = os.path.join(towrite_dir,
@@ -247,8 +276,9 @@ if __name__ == "__main__":
     ## Write a JSON file to disk that summarizes key experiment parameters.
     dict_to_json = vars(args)
     dict_to_json.update({
-        "entropy": ss.entropy, # for reproducability.
-        "todo_roboost": todo_roboost # for reference.
+        "ss_entropy": ss.entropy,
+        "ss_data_entropy": args.entropy,
+        "todo_roboost": todo_roboost
     })
     towrite_json = os.path.join(towrite_dir, towrite_name+".json")
     with open(towrite_json, "w", encoding="utf-8") as f:

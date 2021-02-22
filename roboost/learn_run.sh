@@ -12,4 +12,3 @@ PROCS="10"
 STEP="0.01"
 
 python "learn_driver.py" --algo="$ALGO" --batch-size="$BATCH" --data="$DATA" --loss="$LOSS" --model="$MODEL" --num-epochs="$EPOCHS" --num-processes="$PROCS" --num-trials="$TRIALS" --step-size="$STEP" --task-name="$TASK"
-
