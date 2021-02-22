@@ -6,7 +6,7 @@ In this repository, we provide software and demonstrations related to the follow
 - Scaling-Up Robust Gradient Descent Techniques. Matthew J. Holland. *AAAI 2021*.
 - <a href="https://arxiv.org/abs/2012.07346">Better scalability under potentially heavy-tailed feedback</a>. Matthew J. Holland. *Archival version*.
 
-This project contains code which can be used to faithfully reproduce all the experimental results given in the above papers, and it can be easily applied to more general machine learning tasks outside the examples considered here.
+This repository contains code which can be used to faithfully reproduce all the experimental results given in the above papers, and it can be easily applied to more general machine learning tasks outside the examples considered here.
 
 At a high level, this repository is divided into two main parts:
 
