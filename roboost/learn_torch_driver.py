@@ -72,6 +72,10 @@ parser.add_argument("--verbose",
                     action="store_true", default=False)
                     
 
+## Setup of random generator.
+ss = np.random.SeedSequence()
+rg = np.random.default_rng(seed=ss)
+
 ## Parse the arguments passed via command line.
 args = parser.parse_args()
 if args.data is None:
@@ -120,7 +124,7 @@ if __name__ == "__main__":
         print("Start data prep.")
         print("args.data:", args.data)
         (X_bench, y_bench, X_train, y_train, X_val, y_val,
-         X_test, y_test, ds_paras) = get_data(args.data)
+         X_test, y_test, ds_paras) = get_data(dataset=args.data, rg=rg)
         print("Is contiguous?")
         print("X_bench", X_bench.is_contiguous())
         print("X_train", X_train.is_contiguous())

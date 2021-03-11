@@ -8,155 +8,78 @@ from tables import open_file
 import torch
 from torch.utils.data import TensorDataset
 
+## Internal modules.
+from mml.data import dataset_dict, dataset_list, get_data_general
+
 
 ###############################################################################
 
 
-## Clerical preparation.
-
-# This directory will need to be set manually.
+## If benchmark data is to be used, specify the directory here.
 dir_data_toread = os.path.join(str(Path.home()), "DATADIR")
 
-# Specific dataset parameters that are set manually.
-_n_train_frac = 0.8
-_n_val_frac = 0.1*0.8
 
-dataset_paras = {
-    "adult": {"type": "classification",
-              "chance_level": 0.7522, # freq of the majority class.
-              "n_train_frac": _n_train_frac,
-              "n_val_frac": _n_val_frac},
-    "australian": {"type": "classification",
-                   "chance_level": 0.5551, # freq of the majority class.
-                   "n_train_frac": _n_train_frac,
-                   "n_val_frac": _n_val_frac},
-    "cifar10": {"type": "classification",
-                "chance_level": 0.1,
-                "pix_h": 32,
-                "pix_w": 32,
-                "channels": 3,
-                "n_train_frac": _n_train_frac,
-                "n_val_frac": _n_val_frac},
-    "cod_rna": {"type": "classification",
-                "chance_level": 0.6666, # freq of the majority class.
-                "n_train_frac": _n_train_frac,
-                "n_val_frac": _n_val_frac},
-    "emnist_balanced": {"type": "classification",
-                        "chance_level": 1/47,
-                        "pix_h": 28,
-                        "pix_w": 28,
-                        "channels": 1,
-                        "n_train_frac": _n_train_frac,
-                        "n_val_frac": _n_val_frac},
+## First set dataset parameter dictionary with standard values
+## for all the benchmark datasets in mml.
+dataset_paras = dataset_dict
+
+
+## Then add customized parameters for the simulations local to this project.
+dataset_paras_local = {
     "ex_quad": {"type": "regression",
-                "n_train_frac": 1.0},
-    "fashion_mnist": {"type": "classification",
-                      "chance_level": 0.1,
-                      "pix_h": 28,
-                      "pix_w": 28,
-                      "channels": 1,
-                      "n_train_frac": _n_train_frac,
-                      "n_val_frac": _n_val_frac},
-    "mnist": {"type": "classification",
-              "chance_level": 0.1,
-              "pix_h": 28,
-              "pix_w": 28,
-              "channels": 1,
-              "n_train_frac": _n_train_frac,
-              "n_val_frac": _n_val_frac}}
+                "n_train_frac": 1.0}
+}
+dataset_paras.update(dataset_paras_local)
 
 
-## Data-fetching function.
+## Data generation procedure.
 
-def get_data(dataset):
+def get_data(dataset, rg):
     '''
     Takes a string, return a tuple of data and parameters.
     '''
-    try:
+    if dataset in dataset_paras:
         paras = dataset_paras[dataset]
-    except KeyError:
+        if dataset in dataset_list:
+            ## Benchmark dataset case.
+            return get_data_general_torch(dataset=dataset,
+                                          paras=paras, rg=rg,
+                                          directory=dir_data_toread)
+        else:
+            ## Local simulation case.
+            return get_data_ex_quad(paras=paras, rg=rg)
+    else:
         raise ValueError(
             "Did not recognize dataset {}.".format(dataset)
         )
+        
 
-    if dataset == "ex_quad":
-        return get_data_ex_quad(dataset=dataset, paras=paras)
-    else:
-        return get_data_general(dataset=dataset, paras=paras)
-    
-
-def get_data_general(dataset, paras):
+def get_data_general_torch(dataset, paras, rg, directory):
     '''
-    General purpose data-getter.
+    A local torch wrapper for our general purpose data-getter.
     '''
-    
-    ## Setup of random generator.
-    ss = np.random.SeedSequence()
-    rg = np.random.default_rng(seed=ss)
-    
-    toread = os.path.join(dir_data_toread, dataset,
-                          "{}.h5".format(dataset))
 
-    with open_file(toread, mode="r") as f:
-        print(f)
-        X = f.get_node(where="/", name="X").read().astype(np.float32)
-        y = f.get_node(where="/", name="y").read().astype(np.int64).ravel()
-        print("Types: X ({}), y ({}).".format(type(X), type(y)))
+    X_train, y_train, X_val, y_val, X_test, y_test, paras = get_data_general(
+        dataset=dataset, paras=paras, rg=rg, directory=directory,
+        do_normalize=True, do_shuffle=True, do_onehot=False
+    )
+    if y_train.shape[1] > 1:
+        raise ValueError("Assumes only one label for each data point.")
     
-    ## If sample sizes are correct, then get an index for shuffling.
-    if len(X) != len(y):
-        s_err = "len(X) != len(y) ({} != {})".format(len(X),len(y))
-        raise ValueError("Dataset sizes wrong. "+s_err)
-    else:
-        idx_shuffled = rg.permutation(len(X))
+    n_train = len(X_train)
+    n_val = len(X_val)
     
-    X = X[idx_shuffled,:]
-    y = y[idx_shuffled]
-    
-    ## Normalize the inputs in a per-feature manner (as max/min are vecs).
-    maxvec = np.max(X, axis=0)
-    minvec = np.min(X, axis=0)
-    X = X-minvec
-    with np.errstate(divide="ignore", invalid="ignore"):
-        X = X / (maxvec-minvec)
-        X[X == np.inf] = 0
-        X = np.nan_to_num(X)
-    del maxvec, minvec
+    X_bench = np.vstack((X_train,X_val))
+    y_bench = np.vstack((y_train,y_val))
 
-    ## Get split sizes (training, validation, testing).
-    n_all, num_features = X.shape
-    print("(n_all, num_features) = {}".format((n_all, num_features)))
-    n_train = int(n_all*paras["n_train_frac"])
-    n_val = int(n_all*paras["n_val_frac"])
-    n_test = n_all-n_train-n_val
-    print("n_train = {}".format(n_train))
-    print("n_val = {}".format(n_val))
-    print("n_test = {}".format(n_test))
-
-    ## Learning task specific parameter additions.
-    paras.update({"num_features": num_features})
-    if paras["type"] == "classification":
-        paras.update({"num_classes": np.unique(y).size})
-        print("num_classes = {}".format(paras["num_classes"]), "\n")
-
-    ## Actually split the data (bench=training+validation, testing).
-    X_bench = X[0:(n_train+n_val),:]
-    X_test = X[(n_train+n_val):,:]
-    y_bench = y[0:(n_train+n_val)]
-    y_test = y[(n_train+n_val):]
-    print("Types and shapes (before mapping):")
-    print("X_bench: {} and {}.".format(type(X_bench), X_bench.shape))
-    print("y_bench: {} and {}.".format(type(y_bench), y_bench.shape))
-    print("X_test: {} and {}.".format(type(X_test), X_test.shape))
-    print("y_test: {} and {}.".format(type(y_test), y_test.shape), "\n")
-    
     ## Map from numpy arrays to torch tensors, and clear unneeded variables.
+    ## Also flatten as needed.
     X_bench, y_bench, X_test, y_test = map(
         torch.tensor,
-        (X_bench, y_bench, X_test, y_test)
+        (X_bench, y_bench.reshape(-1), X_test, y_test.reshape(-1))
     )
-    del X, y
-
+    del X_train, y_train, X_val, y_val
+    
     ## Get views of relevant training and validation subsets.
     X_train = X_bench[0:n_train,:]
     X_val = X_bench[n_train:,:]
@@ -172,14 +95,10 @@ def get_data_general(dataset, paras):
             X_test, y_test, paras)
 
 
-def get_data_ex_quad(dataset, paras):
+def get_data_ex_quad(paras, rg):
     '''
     A simple noise-free linear dataset for sanity checks.
     '''
-    
-    ## Setup of random generator.
-    ss = np.random.SeedSequence()
-    rg = np.random.default_rng(seed=ss)
     
     n_tr = 45
     n_val = 15
