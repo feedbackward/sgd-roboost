@@ -29,7 +29,7 @@ A table of contents for this README file:
 Before getting into the specifics of using this repository, please carry out the following preparatory steps.
 
 - Ensure you have the <a href="https://github.com/feedbackward/mml#prereq">prerequisite software</a> used in the setup of our `mml` repository.
-- Ensure that you can install and use <a href="https://pytorch.org/">PyTorch</a>on your system. Furthermore, if you wish to use the <a href="https://developer.nvidia.com/cuda-toolkit">CUDA Toolkit</a>, it is already installed.
+- Ensure that you can install and use <a href="https://pytorch.org/">PyTorch</a> on your system. Furthermore, if you wish to use the <a href="https://developer.nvidia.com/cuda-toolkit">CUDA Toolkit</a>, it should already be installed and verified to be working properly.
 
 Next, make a local copy of the repository and create a virtual environment for working in as follows:
 
@@ -60,13 +60,15 @@ To install PyTorch (within the `sgd-roboost` virtual environment), run
 (sgd-roboost) $ conda install pytorch cudatoolkit=[CUDA version] -c pytorch -c conda-forge
 ```
 
-being sure to replace `[CUDA version]` with the appropriate CUDA toolkit version depending on your hardware (if applicable; see <a href="https://pytorch.org/get-started/locally/">theofficial PyTorch site</a> for more details).
+being sure to replace `[CUDA version]` with the appropriate CUDA toolkit version depending on your hardware (if applicable; see <a href="https://pytorch.org/get-started/locally/">the official PyTorch site</a> for more details).
 
 
 <a id="setup_data"></a>
 ## Setup: preparing the benchmark data sets
 
-Please follow the instructions under <a href="https://github.com/feedbackward/mml#data">"Acquiring benchmark datasets"</a> using our `mml` repository. The rest of this README assumes that the user has prepared any desired benchmark datasets, stored in a local data storage directory (default path is `[path to mml]/mml/mml/data` as specified by the variable `dir_data_towrite` in `mml/mml/config.py`. Henceforth, we will refer to the directory housing the HDF5-formatted data sub-directories as __Data-Main__.
+Please follow the instructions under <a href="https://github.com/feedbackward/mml#data">"Acquiring benchmark datasets"</a> using our `mml` repository. The rest of this README assumes that the user has prepared any desired benchmark datasets, stored in a local data storage directory (default path is `[path to mml]/mml/mml/data` as specified by the variable `dir_data_towrite` in `mml/mml/config.py`.
+
+Henceforth, we will refer to the directory housing the HDF5-formatted data sub-directories as __Data-Main__.
 
 
 <a id="setup_torch"></a>
