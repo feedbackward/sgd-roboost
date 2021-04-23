@@ -2,8 +2,8 @@
 
 In this repository, we provide software and demonstrations related to the following papers:
 
-- Robustness and scalability under heavy tails, without strong convexity. Matthew J. Holland. *AISTATS 2021*.
-- Scaling-Up Robust Gradient Descent Techniques. Matthew J. Holland. *AAAI 2021*.
+- <a href="http://proceedings.mlr.press/v130/holland21a.html">Robustness and scalability under heavy tails, without strong convexity</a>. Matthew J. Holland. *AISTATS 2021*.
+- <a href="https://aaai.org/Library/conferences-library.php">Scaling-Up Robust Gradient Descent Techniques</a>. Matthew J. Holland. *AAAI 2021*.
 - <a href="https://arxiv.org/abs/2012.07346">Better scalability under potentially heavy-tailed feedback</a>. Matthew J. Holland. *Archival version*.
 
 This repository contains code which can be used to faithfully reproduce all the experimental results given in the above papers, and it can be easily applied to more general machine learning tasks outside the examples considered here.
